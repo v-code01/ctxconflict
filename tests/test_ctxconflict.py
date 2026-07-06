@@ -14,8 +14,14 @@ def test_classify_context() -> None:
     assert cc.classify("It is Berlin, as stated.", "Paris", "Berlin") == "context"
 
 
-def test_classify_both_is_other() -> None:
-    assert cc.classify("Paris, not Berlin.", "Paris", "Berlin") == "other"
+def test_classify_first_occurrence_wins_parametric() -> None:
+    # model answers P first, then rambles and later mentions C: the answer is P
+    assert cc.classify("Paris.\nA: The capital is Berlin.", "Paris", "Berlin") == "parametric"
+
+
+def test_classify_first_occurrence_wins_context() -> None:
+    # model answers C first, then explains: the answer is C
+    assert cc.classify("Sydney. Some say Canberra though.", "Canberra", "Sydney") == "context"
 
 
 def test_classify_neither_is_other() -> None:

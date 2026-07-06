@@ -6,17 +6,22 @@ from __future__ import annotations
 
 
 def classify(text: str, p: str, c: str) -> str:
-    """Label an answer. parametric = P present and C absent; context = C present
-    and P absent; other = both or neither. Case-insensitive substring match; the
-    caller guarantees P and C are distinctive and not substrings of each other."""
+    """Label an answer by which of P or C the model states FIRST: parametric if P
+    appears before C (or only P), context if C appears first (or only C), other if
+    neither. First-occurrence, not present/absent, so a correct answer that later
+    rambles past the alternative (e.g. "Paris. ... Berlin ...") is scored as the
+    answer the model actually gave. Case-insensitive; the caller guarantees P and C
+    are distinctive and not substrings of each other."""
     low = text.lower()
-    has_p = p.lower() in low
-    has_c = c.lower() in low
-    if has_p and not has_c:
+    ip = low.find(p.lower())
+    ic = low.find(c.lower())
+    if ip < 0 and ic < 0:
+        return "other"
+    if ic < 0:
         return "parametric"
-    if has_c and not has_p:
+    if ip < 0:
         return "context"
-    return "other"
+    return "parametric" if ip < ic else "context"
 
 
 def build_control(stem: str) -> str:
