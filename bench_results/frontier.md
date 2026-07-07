@@ -6,9 +6,9 @@
 # avoid the 'never knew it' confound.
 
 model qwen1.5b control_correct 22/24 famous_control_correct 11/12
-model qwen1.5b condition plain override 5/22 rate 0.2273
+model qwen1.5b condition plain override 4/22 rate 0.1818
 model qwen1.5b condition plain tier famous override 1/11 rate 0.0909
-model qwen1.5b condition plain tier obscure override 4/11 rate 0.3636
+model qwen1.5b condition plain tier obscure override 3/11 rate 0.2727
 model qwen1.5b condition emphatic override 17/22 rate 0.7727
 model qwen1.5b condition emphatic tier famous override 6/11 rate 0.5455
 model qwen1.5b condition emphatic tier obscure override 11/11 rate 1.0000

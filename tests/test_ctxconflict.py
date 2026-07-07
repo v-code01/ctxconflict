@@ -28,6 +28,16 @@ def test_classify_neither_is_other() -> None:
     assert cc.classify("I am not sure.", "Paris", "Berlin") == "other"
 
 
+def test_classify_negated_context_is_parametric() -> None:
+    # model rejects the false premise: "not Zurich ... is Bern" -> answered Bern
+    assert cc.classify("not Zurich. The capital of Switzerland is Bern.", "Bern", "Zurich") == "parametric"
+
+
+def test_classify_negated_parametric_is_context() -> None:
+    # model rejects the true answer in favor of the false one
+    assert cc.classify("It is not Bern, it is Zurich.", "Bern", "Zurich") == "context"
+
+
 def test_classify_case_insensitive() -> None:
     assert cc.classify("the answer is PARIS.", "Paris", "Berlin") == "parametric"
 

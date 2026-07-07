@@ -18,22 +18,28 @@ is excluded. So every counted override is a fact the model demonstrably knew and
 then abandoned when the context asserted otherwise. The control column (11/12
 famous) establishes the knowledge; the override columns measure the loss of it.
 
-## "The classifier could be miscounting rambling outputs."
-This was found and fixed during the build: greedy answers often state the correct
-answer, then ramble and mention the alternative later ("Paris. ... A: Berlin").
-A present/absent classifier scored those "other" and undercounted. The shipped
-classifier scores by which of P or C appears *first* - the answer the model
-actually gave - and this is unit-tested (answer-then-ramble cases both ways). The
-independent verifier reimplements the same first-occurrence rule and reproduces
-the numbers.
+## "The classifier could be miscounting rambling or negating outputs."
+Two failure modes were found and fixed during the build. First, greedy answers
+often state the correct answer then ramble past the alternative ("Paris. ... A:
+Berlin"); a present/absent classifier scored those "other". Second - caught in
+pre-ship review - a model sometimes *rejects* the false premise ("not Zurich. The
+capital of Switzerland is Bern"), and a naive first-occurrence rule scored the
+negated "Zurich" as an override. The shipped classifier scores by which of P or C
+is *asserted* first, skipping negated mentions, and is unit-tested for both the
+ramble and the negation cases in both directions. The independent verifier
+reimplements the same rule and reproduces the numbers. Fixing the negation case
+moved the 1.5B plain override from 5/22 to 4/22 (0.18) and is precisely why P2 is
+reported as falsified for the 1.5B rather than held - the correction was made and
+disclosed, not smoothed over.
 
-## "24 items is small, and the plain override (23-26%) is only ~5 items."
-The tokenization-scale effects here are the emphatic overrides (77-100%) and the
-control validity (11/12), which are not marginal. The plain override is offered as
-"a single sentence already moves a meaningful fraction," and its exact value is
-reported as a fraction (5/22, 5/19) with the denominator visible, not dressed up.
-The dose-response and capability ordering are consistent in direction across both
-models, which a pure-noise account would not predict.
+## "24 items is small, and the plain override (18-26%) is only ~4-5 items."
+Fair, and it is exactly why P2 is reported as split at the 20% bar rather than
+claimed clean - the 1.5B plain override is 4/22, a single item from the threshold,
+and we say so. The load-bearing effects are the emphatic overrides (77-100%) and
+the control validity (11/12), which are not marginal, plus the dose-response and
+capability ordering, which are consistent in direction across both models. Every
+override is reported as a fraction (4/22, 5/19) with the denominator visible, not
+dressed up.
 
 ## "Greedy outputs might not reproduce, so the rates are not stable."
 The raw outputs are committed in `results/gen.jsonl`; analysis and the independent
@@ -55,6 +61,9 @@ is the joint effect (less-famous, more-plausibly-contradicted facts fall first),
 not an isolated popularity coefficient.
 
 ## Pre-registration honesty
-All four predictions were committed before the run and all held; the override rate
-was pre-specified as conditioned on control-correct. Results, including the near-
-saturated 0.5B emphatic column, are reported as-is.
+All four predictions were committed before the run; the override rate was
+pre-specified as conditioned on control-correct. P1, P3, P4 held; P2 held for the
+0.5B and was narrowly falsified for the 1.5B (18% vs the 20% bar), and that
+falsification is stated plainly rather than papered over - it only surfaced
+because a classifier bug was fixed in review. Results, including the near-saturated
+0.5B emphatic column, are reported as-is.
