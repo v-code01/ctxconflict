@@ -1,0 +1,57 @@
+# Every claim ctxconflict makes, each tied to the artifact that proves it.
+# Verify integrity with ./scripts/gate.sh; reproduce with ./reproduce.sh.
+
+[project]
+name = "ctxconflict"
+summary = "When a prompt's context asserts a false fact that contradicts a model's parametric knowledge, does it follow the context or its memory - measured on real llama.cpp servers (Qwen2.5-1.5B and 0.5B), greedy, judge-free (parametric answer P and false answer C are known distinctive strings, scored by which the model states first). Both models know the famous facts (11/12 control-correct). Among facts the model demonstrably knew, one plain false-premise sentence overrides the answer on 23% (1.5B) and 26% (0.5B); a forceful repeated premise overrides 77% (1.5B) and 100% (0.5B) - a strong dose-response. The smaller model is more suggestible at both doses, and obscure facts are overridden more than famous ones (1.5B emphatic: obscure 100% vs famous 55%). The override rate is always conditioned on control-correct to avoid the never-knew-it confound."
+language = "Python"
+license = "MIT"
+oracles = "the known parametric answer P and injected false answer C, both distinctive and never substrings of each other; the answer is classified by which of P or C appears first in the greedy output (parametric / context / other). results/gen.jsonl (144 rows) is committed. tools/verify.py re-classifies with its own first-occurrence classifier and recomputes every rate, sharing no code with src or analyze.py. No LLM judge."
+
+[[claim]]
+id = "pre-registered-prediction"
+statement = "Four predictions were committed to git in PREREG.md before the run - the facts are known (P1), a false premise overrides real knowledge (P2), the smaller model is more suggestible (P3), more forceful assertion and less-famous facts are overridden more (P4) - and all four held. PREREG.md is not edited after results."
+evidence = "PREREG.md (committed before results); README pre-registration section; bench_results/frontier.md."
+status = "verified"
+
+[[claim]]
+id = "facts-are-known"
+statement = "Both models answer the famous facts correctly with no context 11/12 of the time (0.92), so there is genuine parametric knowledge for the false context to override. Overall control parametric-correct: 22/24 (1.5B), 19/24 (0.5B)."
+evidence = "bench_results/frontier.md control_correct lines; tools/verify.py asserts 1.5B famous control-correct >= 0.6."
+status = "verified"
+
+[[claim]]
+id = "false-context-overrides"
+statement = "Among facts the model demonstrably knew, one plain false-premise sentence flips the answer to the falsehood on 23% (5/22, 1.5B) and 26% (5/19, 0.5B) - silently, a confident wrong answer - but most facts survive one sentence (override well below 100%)."
+evidence = "bench_results/frontier.md plain override lines; tools/verify.py asserts plain override in [0.20, 1.0) for both models."
+status = "verified"
+
+[[claim]]
+id = "dose-response"
+statement = "Escalating from one sentence to a forceful, repeated false premise raises the override rate from 23% to 77% (1.5B) and from 26% to 100% (0.5B). The context does not have to be true, only insistent."
+evidence = "bench_results/frontier.md plain vs emphatic override lines; tools/verify.py asserts emphatic override > plain override for both models."
+status = "verified"
+
+[[claim]]
+id = "smaller-model-more-suggestible"
+statement = "The 0.5B overrides more than the 1.5B at both doses (26% vs 23% plain; 100% vs 77% emphatic) - the weaker model has a shakier grip on the fact and less resistance to the false premise."
+evidence = "bench_results/frontier.md override lines by model; tools/verify.py asserts 0.5B plain override > 1.5B plain override."
+status = "verified"
+
+[[claim]]
+id = "obscure-falls-harder"
+statement = "Obscure facts are overridden more than famous ones: on the 1.5B, emphatic context overrides 100% of obscure facts but only 55% of famous ones (plain: 36% vs 9%). On the 0.5B the effect saturates (emphatic overrides both tiers)."
+evidence = "bench_results/frontier.md tier override lines; README finding 5; tools/verify.py reports the per-tier override rates."
+status = "verified"
+
+[[claim]]
+id = "no-overclaim"
+statement = "Two models, one family, greedy decoding, 24 items, one false answer per item, conditioned on control-correct. A hazard demonstration, not a population estimate of RAG corruption rates. The obscure tier pairs less-famous facts with more-plausible false answers, so the popularity effect and the plausibility of C are not fully separated (disclosed)."
+evidence = "README limitations + falsifiers; REVIEW.md"
+status = "verified"
+
+[[claim]]
+id = "clean-build"
+statement = "The analysis is ruff-clean and mypy --strict clean, the prompt builders and first-occurrence classifier have unit tests (P first, C first, neither, case-insensitive, answer-then-ramble), sources are pure ASCII, the independent verify passes, and no private operating-environment details (host, port, model endpoint) are present in tracked files."
+evidence = "scripts/gate.sh."
+status = "verified"
